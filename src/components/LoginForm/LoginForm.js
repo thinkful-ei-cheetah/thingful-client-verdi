@@ -13,7 +13,8 @@ export default class LoginForm extends Component {
   handleSubmitBasicAuth = async ev => {
     ev.preventDefault()
     const { user_name, password } = ev.target
-
+    this.setState({error: null})
+    
     try {
       const res = await AuthApiService.login(user_name.value, password.value)
       TokenService.saveAuthToken(res.authToken);

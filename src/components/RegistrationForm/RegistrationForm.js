@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Button, Input, Required } from '../Utils/Utils'
+import AuthApiService from '../../services/auth-api-service';
 
 export default class RegistrationForm extends Component {
   static defaultProps = {
@@ -8,18 +9,23 @@ export default class RegistrationForm extends Component {
 
   state = { error: null }
 
-  handleSubmit = ev => {
+  handleSubmit = async ev => {
     ev.preventDefault()
-    const { full_name, nick_name, user_name, password } = ev.target
+    const { full_name, nickname, user_name, password } = ev.target
+    const userData = {full_name, nickname, user_name, password}
 
-    console.log('registration form submitted')
-    console.log({ full_name, nick_name, user_name, password })
-
-    full_name.value = ''
-    nick_name.value = ''
-    user_name.value = ''
-    password.value = ''
-    this.props.onRegistrationSuccess()
+    try {
+      const savedUser = await AuthApiService.createUser(userData)
+      console.log(savedUser)
+      full_name.value = ''
+      nickname.value = ''
+      user_name.value = ''
+      password.value = ''
+      this.props.onRegistrationSuccess()
+    } catch(err) {
+      this.setState({error: err.error})
+    }
+    
   }
 
   render() {
@@ -65,15 +71,15 @@ export default class RegistrationForm extends Component {
             id='RegistrationForm__password'>
           </Input>
         </div>
-        <div className='nick_name'>
-          <label htmlFor='RegistrationForm__nick_name'>
+        <div className='nickname'>
+          <label htmlFor='RegistrationForm__nickname'>
             Nickname
           </label>
           <Input
-            name='nick_name'
+            name='nickname'
             type='text'
             required
-            id='RegistrationForm__nick_name'>
+            id='RegistrationForm__nickname'>
           </Input>
         </div>
         <Button type='submit'>
