@@ -18,7 +18,6 @@ const AuthApiService = {
   },
 
   async createUser(userData){
-    console.log(`${config.API_ENDPOINT}`);
     const res = await fetch(`${config.API_ENDPOINT}/users`, {
       method: 'POST',
       headers: {

@@ -12,7 +12,12 @@ export default class RegistrationForm extends Component {
   handleSubmit = async ev => {
     ev.preventDefault()
     const { full_name, nickname, user_name, password } = ev.target
-    const userData = {full_name, nickname, user_name, password}
+    const userData = {
+      full_name: full_name.value,
+      nickname: nickname.value,
+      user_name: user_name.value,
+      password: password.value
+    };
 
     try {
       const savedUser = await AuthApiService.createUser(userData)
@@ -23,9 +28,9 @@ export default class RegistrationForm extends Component {
       password.value = ''
       this.props.onRegistrationSuccess()
     } catch(err) {
+      console.log(err);
       this.setState({error: err.error})
     }
-    
   }
 
   render() {
