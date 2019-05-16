@@ -5,6 +5,8 @@ import ThingApiService from '../../services/thing-api-service'
 import { Hyph, Section } from '../../components/Utils/Utils'
 import { ThingStarRating } from '../../components/ThingStarRating/ThingStarRating'
 import ReviewForm from '../../components/ReviewForm/ReviewForm'
+import { Redirect } from 'react-router-dom'
+
 import './ThingPage.css'
 
 export default class ThingPage extends Component {
@@ -14,19 +16,23 @@ export default class ThingPage extends Component {
 
   static contextType = ThingContext
 
-  componentDidMount() {
+  async componentDidMount() {
     const { thingId } = this.props.match.params
     this.context.clearError()
-    ThingApiService.getThing(thingId)
-      .then(this.context.setThing)
-      .catch(this.context.setError)
-    ThingApiService.getThingReviews(thingId)
-      .then(this.context.setReviews)
-      .catch(this.context.setError)
+    try {
+      const thing = await ThingApiService.getThing(thingId)
+      this.context.setThing(thing)
+
+      const reviews = await ThingApiService.getThingReviews(thingId)
+      this.context.setReviews(reviews)
+    } catch(err){
+      this.context.setError(err)
+    }
   }
 
   componentWillUnmount() {
     this.context.clearThing()
+    this.context.clearError()
   }
 
   renderThing() {
@@ -42,11 +48,17 @@ export default class ThingPage extends Component {
 
   render() {
     const { error, thing } = this.context
+    const {location} = this.props;
+
+    if (error && error.error.startsWith('Session expired')){
+      return <Redirect push to={{
+        pathname: '/login',
+        state: { from: location.pathname, error: error.error }}}/>
+    }
+
     let content
     if (error) {
-      content = (error.error === `Thing doesn't exist`)
-        ? <p className='red'>Thing not found</p>
-        : <p className='red'>There was an error</p>
+      content = <p className='red'>{error.error}</p>
     } else if (!thing.id) {
       content = <div className='loading' />
     } else {

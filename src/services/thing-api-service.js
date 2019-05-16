@@ -19,11 +19,18 @@ const ThingApiService = {
         'Authorization': `Bearer ${TokenService.getAuthToken()}`
       },
     })
-      .then(res =>
-        (!res.ok)
-          ? res.json().then(e => Promise.reject(e))
-          : res.json()
-      )
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(e => {
+            if (e.error.startsWith('Session expired')) {
+              TokenService.clearAuthToken();
+            }
+            return Promise.reject(e)
+          })
+        }
+          
+        return res.json()
+      })
   },
   getThingReviews(thingId) {
     return fetch(`${config.API_ENDPOINT}/things/${thingId}/reviews`, {
@@ -31,11 +38,18 @@ const ThingApiService = {
         'Authorization': `Bearer ${TokenService.getAuthToken()}`
       },
     })
-      .then(res =>
-        (!res.ok)
-          ? res.json().then(e => Promise.reject(e))
-          : res.json()
-      )
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(e => {
+          if (e.error.startsWith('Session expired')) {
+            TokenService.clearAuthToken();
+          }
+          return Promise.reject(e)
+        })
+      }
+        
+      return res.json()
+    })
   },
   postReview(thingId, text, rating) {
     return fetch(`${config.API_ENDPOINT}/reviews`, {
@@ -50,11 +64,18 @@ const ThingApiService = {
         text,
       }),
     })
-      .then(res =>
-        (!res.ok)
-          ? res.json().then(e => Promise.reject(e))
-          : res.json()
-      )
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(e => {
+          if (e.error.startsWith('Session expired')) {
+            TokenService.clearAuthToken();
+          }
+          return Promise.reject(e)
+        })
+      }
+        
+      return res.json()
+    })
   }
 }
 

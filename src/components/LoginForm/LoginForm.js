@@ -2,13 +2,17 @@ import React, { Component } from 'react'
 import { Button, Input } from '../Utils/Utils'
 import TokenService from '../../services/token-service';
 import AuthApiService from '../../services/auth-api-service';
+import ThingContext from '../../contexts/ThingContext';
 
 export default class LoginForm extends Component {
   static defaultProps = {
     onLoginSuccess: () => {}
   }
 
-  state = { error: null }
+  static contextType = ThingContext;
+
+  state = { error: this.context.error ? this.context.error.error : null }
+  // state = { error: null }
 
   handleSubmitBasicAuth = async ev => {
     ev.preventDefault()
