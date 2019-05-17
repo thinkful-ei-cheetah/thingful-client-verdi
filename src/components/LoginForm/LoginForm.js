@@ -3,6 +3,7 @@ import { Button, Input } from '../Utils/Utils'
 import TokenService from '../../services/token-service';
 import AuthApiService from '../../services/auth-api-service';
 import ThingContext from '../../contexts/ThingContext';
+import { GoogleLogin } from 'react-google-login';
 
 export default class LoginForm extends Component {
   static defaultProps = {
@@ -12,7 +13,7 @@ export default class LoginForm extends Component {
   static contextType = ThingContext;
 
   state = { error: this.context.error ? this.context.error.error : null }
-  // state = { error: null }
+
 
   handleSubmitBasicAuth = async ev => {
     ev.preventDefault()
@@ -31,41 +32,68 @@ export default class LoginForm extends Component {
     }
   }
 
+  responseGoogle = async (response) => {
+    console.log(response.tokenObj)
+    if (!response.tokenObj) {
+      this.setState({error: 'invalid login attempt'})
+    } else {
+      try {
+        const res = await AuthApiService.loginGoogle(response.tokenObj)
+        TokenService.saveAuthToken(res.authToken);
+        
+        this.props.onLoginSuccess()
+      } catch(err){
+        this.setState({error: err.error})
+      }
+    }
+  }
+
   render() {
     const { error } = this.state
     return (
-      <form
-        className='LoginForm'
-        onSubmit={this.handleSubmitBasicAuth}
-      >
-        <div role='alert'>
-          {error && <p className='red'>{error}</p>}
-        </div>
-        <div className='user_name'>
-          <label htmlFor='LoginForm__user_name'>
-            User name
-          </label>
-          <Input
-            required
-            name='user_name'
-            id='LoginForm__user_name'>
-          </Input>
-        </div>
-        <div className='password'>
-          <label htmlFor='LoginForm__password'>
-            Password
-          </label>
-          <Input
-            required
-            name='password'
-            type='password'
-            id='LoginForm__password'>
-          </Input>
-        </div>
-        <Button type='submit'>
-          Login
-        </Button>
-      </form>
+      <div>
+        <form
+          className='LoginForm'
+          onSubmit={this.handleSubmitBasicAuth}
+        >
+          <div role='alert'>
+            {error && <p className='red'>{error}</p>}
+          </div>
+          <div className='user_name'>
+            <label htmlFor='LoginForm__user_name'>
+              User name
+            </label>
+            <Input
+              required
+              name='user_name'
+              id='LoginForm__user_name'>
+            </Input>
+          </div>
+          <div className='password'>
+            <label htmlFor='LoginForm__password'>
+              Password
+            </label>
+            <Input
+              required
+              name='password'
+              type='password'
+              id='LoginForm__password'>
+            </Input>
+          </div>
+          <Button type='submit'>
+            Login
+          </Button>
+        </form>
+
+        <GoogleLogin
+          clientId='751132963952-93963f71ddp9gtvob1h667haeabv871q.apps.googleusercontent.com'
+          buttonText="Login"
+          onSuccess={this.responseGoogle}
+          onFailure={this.responseGoogle}
+          cookiePolicy={'single_host_origin'}
+        />
+      </div>
+
     )
   }
 }
