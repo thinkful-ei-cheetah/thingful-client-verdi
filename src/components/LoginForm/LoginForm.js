@@ -4,6 +4,7 @@ import TokenService from '../../services/token-service';
 import AuthApiService from '../../services/auth-api-service';
 import ThingContext from '../../contexts/ThingContext';
 import { GoogleLogin } from 'react-google-login';
+import FacebookLogin from 'react-facebook-login';
 
 export default class LoginForm extends Component {
   static defaultProps = {
@@ -48,8 +49,25 @@ export default class LoginForm extends Component {
     }
   }
 
+  responseFacebook = async (response) => {
+    console.log(response);
+    if (!response.accessToken) {
+      this.setState({error: 'invalid login attempt'})
+    } else {
+      try {
+        const res = await AuthApiService.loginFacebook(response)
+        TokenService.saveAuthToken(res.authToken);
+        
+        this.props.onLoginSuccess()
+      } catch(err){
+        this.setState({error: err.error})
+      }
+    }
+  }
+
   render() {
     const { error } = this.state
+
     return (
       <div>
         <form
@@ -86,14 +104,22 @@ export default class LoginForm extends Component {
         </form>
 
         <GoogleLogin
-          clientId='751132963952-93963f71ddp9gtvob1h667haeabv871q.apps.googleusercontent.com'
+          clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
           buttonText="Login"
           onSuccess={this.responseGoogle}
           onFailure={this.responseGoogle}
           cookiePolicy={'single_host_origin'}
         />
-      </div>
 
+
+      <FacebookLogin
+        appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+        fields="name,email,picture"
+        callback={this.responseFacebook}
+        icon="fa-facebook"
+      />
+
+      </div>
     )
   }
 }

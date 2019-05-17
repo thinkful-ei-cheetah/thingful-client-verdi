@@ -32,6 +32,21 @@ const AuthApiService = {
     return res.json();
   },
 
+  async loginFacebook(token) {
+    const res = await fetch(`${config.API_ENDPOINT}/auth/login/facebook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(token)
+    })
+
+    if (!res.ok) {
+      return res.json().then(e => Promise.reject(e))
+    }
+    return res.json();
+  },
+
   async createUser(userData){
     const res = await fetch(`${config.API_ENDPOINT}/users`, {
       method: 'POST',

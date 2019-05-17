@@ -9,6 +9,8 @@ import LoginPage from '../../routes/LoginPage/LoginPage'
 import RegistrationPage from '../../routes/RegistrationPage/RegistrationPage'
 import NotFoundPage from '../../routes/NotFoundPage/NotFoundPage'
 import './App.css'
+require('dotenv').config();
+
 
 class App extends Component {
   state = { hasError: false }
